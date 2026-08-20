@@ -141,7 +141,7 @@
 
     .summary {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 12px;
       padding: 18px 24px;
       border-top: 1px solid var(--line);
@@ -237,6 +237,10 @@
           <div class="period-label">本年總收入</div>
           <div class="period-total" id="yearTotal">NT$ 0</div>
         </div>
+        <div class="summary-box">
+          <div class="period-label">新光保全市值增加</div>
+          <div class="period-total" id="marketCapIncrease">NT$ 0</div>
+        </div>
       </div>
     </section>
 
@@ -267,6 +271,7 @@
       const weekTotalEl = document.getElementById('weekTotal');
       const monthTotalEl = document.getElementById('monthTotal');
       const yearTotalEl = document.getElementById('yearTotal');
+      const marketCapIncreaseEl = document.getElementById('marketCapIncrease');
       const formatter = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 2 });
       const storageKey = 'worklink-daily-sales';
 
@@ -313,22 +318,15 @@
         return new Date(year, month - 1, day);
       }
 
-      function updatePeriodTotals() {
-        const selected = dateFromKey(dateInput.value);
-        const sales = readSales();
-        const startOfWeek = new Date(selected);
-        const day = startOfWeek.getDay();
-        startOfWeek.setDate(startOfWeek.getDate() - (day === 0 ? 6 : day - 1));
-        startOfWeek.setHours(0, 0, 0, 0);
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(endOfWeek.getDate() + 7);
-        const total = matches => Object.entries(sales).reduce((sum, [key, rows]) => {
-          const date = dateFromKey(key);
-          return matches(date) ? sum + totalForRows(rows) : sum;
-        }, 0);
-        weekTotalEl.textContent = money(total(date => date >= startOfWeek && date < endOfWeek));
-        monthTotalEl.textContent = money(total(date => date.getFullYear() === selected.getFullYear() && date.getMonth() === selected.getMonth()));
-        yearTotalEl.textContent = money(total(date => date.getFullYear() === selected.getFullYear()));
+      function updatePeriodTotals(dailyTotal) {
+        const weeklyTotal = dailyTotal * 5;
+        const monthlyTotal = weeklyTotal * 4;
+        const yearlyTotal = monthlyTotal * 12;
+        const marketCapIncrease = yearlyTotal * 0.7 * 16;
+        weekTotalEl.textContent = money(weeklyTotal);
+        monthTotalEl.textContent = money(monthlyTotal);
+        yearTotalEl.textContent = money(yearlyTotal);
+        marketCapIncreaseEl.textContent = money(marketCapIncrease);
       }
 
       function loadSelectedDate() {
@@ -368,7 +366,7 @@
         noteEl.textContent = `共 ${formatter.format(units)} 件商品`;
         countEl.textContent = `${rows.length} 筆`;
         saveSales();
-        updatePeriodTotals();
+        updatePeriodTotals(total);
       }
 
       function addRow(focus = false) {
