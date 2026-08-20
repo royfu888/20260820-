@@ -228,14 +228,17 @@
         <div class="summary-box">
           <div class="period-label">本週總收入</div>
           <div class="period-total" id="weekTotal">NT$ 0</div>
+          <div class="summary-note" id="weekUnits">銷售產品總套數：0 套</div>
         </div>
         <div class="summary-box">
           <div class="period-label">本月總收入</div>
           <div class="period-total" id="monthTotal">NT$ 0</div>
+          <div class="summary-note" id="monthUnits">銷售產品總套數：0 套</div>
         </div>
         <div class="summary-box">
           <div class="period-label">本年總收入</div>
           <div class="period-total" id="yearTotal">NT$ 0</div>
+          <div class="summary-note" id="yearUnits">銷售產品總套數：0 套</div>
         </div>
         <div class="summary-box">
           <div class="period-label">新光保全市值增加</div>
@@ -271,6 +274,9 @@
       const weekTotalEl = document.getElementById('weekTotal');
       const monthTotalEl = document.getElementById('monthTotal');
       const yearTotalEl = document.getElementById('yearTotal');
+      const weekUnitsEl = document.getElementById('weekUnits');
+      const monthUnitsEl = document.getElementById('monthUnits');
+      const yearUnitsEl = document.getElementById('yearUnits');
       const marketCapIncreaseEl = document.getElementById('marketCapIncrease');
       const formatter = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 2 });
       const storageKey = 'worklink-daily-sales';
@@ -318,14 +324,20 @@
         return new Date(year, month - 1, day);
       }
 
-      function updatePeriodTotals(dailyTotal) {
+      function updatePeriodTotals(dailyTotal, dailyUnits) {
         const weeklyTotal = dailyTotal * 5;
         const monthlyTotal = weeklyTotal * 4;
         const yearlyTotal = monthlyTotal * 12;
+        const weeklyUnits = dailyUnits * 5;
+        const monthlyUnits = weeklyUnits * 4;
+        const yearlyUnits = monthlyUnits * 12;
         const marketCapIncrease = yearlyTotal * 0.7 * 16;
         weekTotalEl.textContent = money(weeklyTotal);
         monthTotalEl.textContent = money(monthlyTotal);
         yearTotalEl.textContent = money(yearlyTotal);
+        weekUnitsEl.textContent = `銷售產品總套數：${formatter.format(weeklyUnits)} 套`;
+        monthUnitsEl.textContent = `銷售產品總套數：${formatter.format(monthlyUnits)} 套`;
+        yearUnitsEl.textContent = `銷售產品總套數：${formatter.format(yearlyUnits)} 套`;
         marketCapIncreaseEl.textContent = money(marketCapIncrease);
       }
 
@@ -366,7 +378,7 @@
         noteEl.textContent = `共 ${formatter.format(units)} 件商品`;
         countEl.textContent = `${rows.length} 筆`;
         saveSales();
-        updatePeriodTotals(total);
+        updatePeriodTotals(total, units);
       }
 
       function addRow(focus = false) {
